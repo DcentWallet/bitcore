@@ -1,6 +1,5 @@
 import logger from '../logger';
 import * as express from 'express';
-import { RateLimitStorage } from '../models/rateLimit';
 import { Config } from '../services/config';
 
 type TimedRequest = {
@@ -85,17 +84,6 @@ export function RateLimiter(method: string, perSecond: number, perMinute: number
       const isDisabled = rateLimiter && rateLimiter.disabled;
       if (isDisabled || isWhiteListed(whitelist, identifier)) {
         return next();
-      }
-      let [perSecondResult, perMinuteResult, perHourResult] = await RateLimitStorage.incrementAndCheck(
-        identifier,
-        method
-      );
-      if (
-        perSecondResult.value!.count > perSecond ||
-        perMinuteResult.value!.count > perMinute ||
-        perHourResult.value!.count > perHour
-      ) {
-        return res.status(429).send('Rate Limited');
       }
     } catch (err) {
       logger.error('Rate Limiter failed');
