@@ -124,26 +124,12 @@ export declare namespace CSP {
     streamBlocks(params: StreamBlocksParams): any;
     getFee(params: GetEstimateSmartFeeParams): any;
     broadcastTransaction(params: BroadcastTransactionParams): Promise<any>;
-    createWallet(params: CreateWalletParams): Promise<IWallet>;
-    getWallet(params: GetWalletParams): Promise<IWallet | null>;
-    updateWallet(params: UpdateWalletParams): Promise<any>;
-    getWalletBalance(
-      params: GetWalletBalanceParams
-    ): Promise<{ confirmed: number; unconfirmed: number; balance: number }>;
-    getWalletBalanceAtTime(
-      params: GetWalletBalanceAtTimeParams
-    ): Promise<{ confirmed: number; unconfirmed: number; balance: number }>;
     streamAddressUtxos(params: StreamAddressUtxosParams): any;
     streamAddressTransactions(params: StreamAddressUtxosParams): any;
     streamTransactions(params: StreamTransactionsParams): any;
     getAuthhead(params: StreamTransactionParams): Promise<AuthheadJSON | undefined>;
     getDailyTransactions(params: { chain: string; network: string }): Promise<DailyTransactionsJSON>;
     getTransaction(params: StreamTransactionParams): Promise<TransactionJSON | undefined>;
-    streamWalletAddresses(params: StreamWalletAddressesParams): any;
-    walletCheck(params: WalletCheckParams): any;
-    streamWalletTransactions(params: StreamWalletTransactionsParams): any;
-    streamWalletUtxos(params: StreamWalletUtxosParams): any;
-    streamMissingWalletAddresses(params: StreamWalletMissingAddressesParams);
     getCoinsForTx(params: { chain: string; network: string; txid: string }): Promise<CoinListingJSON>;
     getLocalTip(params): Promise<IBlock | null>;
     getLocatorHashes(params): Promise<any>;
