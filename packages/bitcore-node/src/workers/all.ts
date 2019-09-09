@@ -1,8 +1,6 @@
-import { P2P } from '../services/p2p';
-import { Storage } from '../services/storage';
+
 import { Worker } from '../services/worker';
 import { Api } from '../services/api';
-import { Event } from '../services/event';
 import cluster = require('cluster');
 import parseArgv from '../utils/parseArgv';
 import '../utils/polyfills';
@@ -18,9 +16,7 @@ export const FullClusteredWorker = async () => {
   process.on('SIGTERM', stop);
   process.on('SIGINT', stop);
 
-  services.push(Storage, Event);
   if (cluster.isMaster) {
-    services.push(P2P);
     if (args.DEBUG) {
       services.push(Api);
     } else {

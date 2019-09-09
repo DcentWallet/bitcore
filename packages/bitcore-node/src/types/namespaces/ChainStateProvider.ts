@@ -2,11 +2,12 @@ import { TransactionJSON } from '../Transaction';
 import { IBlock } from '../../models/block';
 import { Request, Response } from 'express';
 import { ChainNetwork } from '../../types/ChainNetwork';
-import { StreamingFindOptions } from '../../services/storage';
 import { AuthheadJSON } from '../Authhead';
 import { CoinListingJSON } from '../Coin';
 import { DailyTransactionsJSON } from '../stats';
+import { StreamingFindOptions } from '../Query';
 import { ICoin } from '../../models/coin';
+
 export declare namespace CSP {
 
   export type StreamAddressUtxosArgs = {
@@ -70,9 +71,9 @@ export declare namespace CSP {
     streamAddressTransactions(params: StreamAddressUtxosParams): any;
     streamTransactions(params: StreamTransactionsParams): any;
     getAuthhead(params: StreamTransactionParams): Promise<AuthheadJSON | undefined>;
-    getDailyTransactions(params: { chain: string; network: string }): Promise<DailyTransactionsJSON>;
+    getDailyTransactions(params: { chain: string; network: string }): Promise<DailyTransactionsJSON | undefined>;
     getTransaction(params: StreamTransactionParams): Promise<TransactionJSON | undefined>;
-    getCoinsForTx(params: { chain: string; network: string; txid: string }): Promise<CoinListingJSON>;
+    getCoinsForTx(params: { chain: string; network: string; txid: string }): Promise<CoinListingJSON | undefined>;
     getLocalTip(params): Promise<IBlock | null>;
     getLocatorHashes(params): Promise<any>;
   }
