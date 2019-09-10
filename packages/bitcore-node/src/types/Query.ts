@@ -1,4 +1,3 @@
-import { ObjectId } from "bson";
 export const enum Direction {
   ascending = 1,
   descending = -1
@@ -6,7 +5,7 @@ export const enum Direction {
 
 export type StreamingFindOptions<T> = Partial<{
   paging: keyof T | '_id';
-  since: T[keyof T] | ObjectId;
+  since: T[keyof T];
   sort: any;
   direction: Direction;
   limit: number;

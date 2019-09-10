@@ -22,7 +22,8 @@ router.get('/:target', CacheMiddleware(CacheTimes.Second), async (req: Request, 
     }
     feeCache[`${chain}:${network}:${target}`] = { fee, date: Date.now() };
     return res.json(fee);
-  } catch (err) {
+    } catch (err) {
+    console.log(err)
     return res.status(500).send('Error getting fee from RPC');
   }
 });

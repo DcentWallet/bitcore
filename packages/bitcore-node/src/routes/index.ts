@@ -28,6 +28,8 @@ for (let chain of chains) {
   }
 }
 
+console.log(chains)
+
 function bootstrap(path?: string) {
   const fs = require('fs');
   const router = express.Router({
