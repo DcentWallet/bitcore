@@ -1,21 +1,15 @@
 import { CoinStorage } from './coin';
 import { partition } from '../utils/partition';
-import { ObjectID } from 'bson';
 import { TransformOptions } from '../types/TransformOptions';
 import { LoggifyClass } from '../decorators/Loggify';
 import { Bitcoin } from '../types/namespaces/Bitcoin';
 import { BaseModel, MongoBound } from './base';
 import logger from '../logger';
 import { StreamingFindOptions, Storage, StorageService } from '../services/storage';
-import * as lodash from 'lodash';
 import { TransactionJSON } from '../types/Transaction';
 import { SpentHeightIndicators } from '../types/Coin';
 import { Config } from '../services/config';
 import { EventStorage } from './events';
-const { onlyWalletEvents } = Config.get().services.event;
-function shouldFire(obj: { wallets?: Array<ObjectID> }) {
-  return !onlyWalletEvents || (onlyWalletEvents && obj.wallets && obj.wallets.length > 0);
-}
 
 const Chain = require('../chain');
 
@@ -34,7 +28,6 @@ export type ITransaction = {
   inputCount: number;
   outputCount: number;
   value: number;
-  wallets: ObjectID[];
 };
 
 export type MintOp = {
@@ -56,11 +49,9 @@ export type MintOp = {
         script: Buffer;
         spentTxid?: string;
         spentHeight?: SpentHeightIndicators;
-        wallets?: Array<ObjectID>;
       };
       $setOnInsert: {
         spentHeight: SpentHeightIndicators;
-        wallets: Array<ObjectID>;
       };
     };
     upsert: true;
@@ -100,12 +91,12 @@ export class TransactionModel extends BaseModel<ITransaction> {
     this.collection.createIndex({ blockHash: 1 }, { background: true });
     this.collection.createIndex({ chain: 1, network: 1, blockTimeNormalized: 1 }, { background: true });
     this.collection.createIndex(
-      { wallets: 1, blockTimeNormalized: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { blockTimeNormalized: 1 },
+      { background: true }
     );
     this.collection.createIndex(
-      { wallets: 1, blockHeight: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { blockHeight: 1 },
+      { background: true }
     );
   }
 
@@ -149,7 +140,6 @@ export class TransactionModel extends BaseModel<ITransaction> {
                   const coin = { ...coinOp.updateOne.update.$set, ...coinOp.updateOne.filter };
                   return { address, coin };
                 })
-                .filter(({ coin }) => shouldFire(coin))
             );
           }
         })
@@ -173,7 +163,7 @@ export class TransactionModel extends BaseModel<ITransaction> {
           await this.collection.bulkWrite(getUpdatedBatchIfMempool(txBatch), { ordered: false });
           if (params.height < SpentHeightIndicators.minimum) {
             EventStorage.signalTxs(
-              txBatch.map(op => ({ ...op.updateOne.update.$set, ...op.updateOne.filter })).filter(shouldFire)
+              txBatch.map(op => ({ ...op.updateOne.update.$set, ...op.updateOne.filter }))
             );
           }
         })
@@ -250,7 +240,6 @@ export class TransactionModel extends BaseModel<ITransaction> {
                 inputCount: parentTx.inputCount,
                 outputCount: parentTx.outputCount,
                 value: parentTx.value,
-                wallets: [],
                 ...(mempoolTime && { mempoolTime })
               }
             },
@@ -268,21 +257,19 @@ export class TransactionModel extends BaseModel<ITransaction> {
       }
       const spent = await CoinStorage.collection
         .find(spentQuery)
-        .project({ spentTxid: 1, value: 1, wallets: 1 })
+        .project({ spentTxid: 1, value: 1 })
         .toArray();
-      type CoinGroup = { [txid: string]: { total: number; wallets: Array<ObjectID> } };
+      type CoinGroup = { [txid: string]: { total: number; } };
       const groupedMints = params.mintOps.reduce<CoinGroup>((agg, coinOp) => {
         const mintTxid = coinOp.updateOne.filter.mintTxid;
         const coin = coinOp.updateOne.update.$set;
-        const { value, wallets = [] } = coin;
+        const { value } = coin;
         if (!agg[mintTxid]) {
           agg[mintTxid] = {
             total: value,
-            wallets: wallets ? [...wallets] : []
           };
         } else {
           agg[mintTxid].total += value;
-          agg[mintTxid].wallets.push(...wallets);
         }
         return agg;
       }, {});
@@ -291,23 +278,15 @@ export class TransactionModel extends BaseModel<ITransaction> {
         if (!agg[coin.spentTxid]) {
           agg[coin.spentTxid] = {
             total: coin.value,
-            wallets: coin.wallets ? [...coin.wallets] : []
           };
         } else {
           agg[coin.spentTxid].total += coin.value;
-          agg[coin.spentTxid].wallets.push(...coin.wallets);
         }
         return agg;
       }, {});
 
       let txOps = params.txs.map(tx => {
         const txid = tx._hash!;
-        const minted = groupedMints[txid] || {};
-        const spent = groupedSpends[txid] || {};
-        const mintedWallets = minted.wallets || [];
-        const spentWallets = spent.wallets || [];
-        const txWallets = mintedWallets.concat(spentWallets);
-        const wallets = lodash.uniqBy(txWallets, wallet => wallet.toHexString());
         let fee = 0;
         if (groupedMints[txid] && groupedSpends[txid]) {
           // TODO: Fee is negative for mempool txs
@@ -335,7 +314,6 @@ export class TransactionModel extends BaseModel<ITransaction> {
                 inputCount: tx.inputs.length,
                 outputCount: tx.outputs.length,
                 value: tx.outputAmount,
-                wallets,
                 ...(mempoolTime && { mempoolTime })
               }
             },
@@ -414,7 +392,6 @@ export class TransactionModel extends BaseModel<ITransaction> {
               },
               $setOnInsert: {
                 spentHeight: SpentHeightIndicators.unspent,
-                wallets: []
               }
             },
             upsert: true,

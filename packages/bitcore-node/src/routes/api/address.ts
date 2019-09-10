@@ -4,14 +4,14 @@ import { ChainStateProvider } from '../../providers/chain-state';
 
 router.get('/:address/txs',  function(req, res) {
   let { address, chain, network } = req.params;
-  let { unspent, limit = 10, since } = req.query;
+  let { unspent, limit = 10, since, offset, pagesize } = req.query;
   let payload = {
     chain,
     network,
     address,
     req,
     res,
-    args: { unspent, limit, since }
+    args: { unspent, limit, since, offset, pagesize }
   };
   ChainStateProvider.streamAddressTransactions(payload);
 });

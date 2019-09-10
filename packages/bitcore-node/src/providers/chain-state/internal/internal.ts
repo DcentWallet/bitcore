@@ -37,19 +37,48 @@ export class InternalStateProvider implements CSP.IChainStateService {
     }
     return query;
   }
+  private getAddressesQuery(params: CSP.StreamAddressesUtxosParams) {
+    const { chain, network, address, args } = params;
+    if (!chain || !network) {
+      throw 'Missing required param';
+    }
+    const addressquery = {
+      $all: address
+    }
+    const query = { chain: chain, network: network.toLowerCase(), address: addressquery } as any;
+    if (args.unspent) {
+      query.spentHeight = { $lt: SpentHeightIndicators.minimum };
+    }
+    return query;
+  }
 
   streamAddressUtxos(params: CSP.StreamAddressUtxosParams) {
     const { req, res, args } = params;
-    const { limit, since } = args;
+    const { limit, since, offset, pagesize } = args;
     const query = this.getAddressQuery(params);
-    Storage.apiStreamingFind(CoinStorage, query, { limit, since, paging: '_id' }, req, res);
+    Storage.apiStreamingFind(CoinStorage, query, { limit, since, paging: '_id', offset, pagesize }, req, res);
   }
+
+  streamAddressesUtxos(params: CSP.StreamAddressesUtxosParams) {
+    const { req, res, args } = params;
+    const { limit, since, offset, pagesize } = args;
+    const query = this.getAddressesQuery(params);
+    Storage.apiStreamingFind(CoinStorage, query, { limit, since, paging: '_id', offset, pagesize }, req, res);
+  }
+
 
   async streamAddressTransactions(params: CSP.StreamAddressUtxosParams) {
     const { req, res, args } = params;
-    const { limit, since } = args;
+    const { limit, offset, pagesize } = args;
     const query = this.getAddressQuery(params);
-    Storage.apiStreamingFind(CoinStorage, query, { limit, since, paging: '_id' }, req, res);
+    Storage.transactionStreamingFind(TransactionStorage, query, { limit, paging: '_id', offset, pagesize }, req, res);
+  }
+
+  async streamAddressesTransactions(params: CSP.StreamAddressesUtxosParams) {
+    const { req, res, args } = params;
+    const { limit, offset, pagesize } = args;
+    const query = this.getAddressesQuery(params);
+    Storage.transactionStreamingFind(TransactionStorage, query, { limit, paging: '_id', offset, pagesize }, req, res);
   }
 
   async getBalanceForAddress(params: CSP.GetBalanceForAddressParams) {
@@ -64,6 +93,19 @@ export class InternalStateProvider implements CSP.IChainStateService {
     let balance = await CoinStorage.getBalance({ query });
     return balance;
   }
+  async getBalanceForAddresses(params: CSP.GetBalanceForAddressesParams) {
+    const { chain, network, address } = params;
+    const query = {
+      chain,
+      network,
+      address: { $in: address },
+      spentHeight: { $lt: SpentHeightIndicators.minimum },
+      mintHeight: { $gt: SpentHeightIndicators.conflicting }
+    };
+    let balance = await CoinStorage.getBalances({ query });
+    return balance;
+  }
+
 
   streamBlocks(params: CSP.StreamBlocksParams) {
     const { req, res } = params;

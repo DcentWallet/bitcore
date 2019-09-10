@@ -28,6 +28,9 @@ export declare namespace CSP {
   export type GetBalanceForAddressParams = ChainNetwork & {
     address: string;
   };
+  export type GetBalanceForAddressesParams = ChainNetwork & {
+    address: string[];
+  };
 
   export type GetBlockParams = ChainNetwork & {
     blockId?: string;
@@ -54,6 +57,13 @@ export declare namespace CSP {
     res: Response;
     args: Partial<StreamAddressUtxosArgs & StreamingFindOptions<ICoin>>;
   };
+  
+  export type StreamAddressesUtxosParams = ChainNetwork & {
+    address: string[];
+    req: Request;
+    res: Response;
+    args: Partial<StreamAddressUtxosArgs & StreamingFindOptions<ICoin>>;
+  };
 
   export type StreamTransactionsParams = ChainNetwork & {
     req: Request;
@@ -70,12 +80,17 @@ export declare namespace CSP {
     getBalanceForAddress(
       params: GetBalanceForAddressParams
     ): Promise<{ confirmed: number; unconfirmed: number; balance: number }>;
+    getBalanceForAddresses(
+      params: GetBalanceForAddressesParams
+    ): Promise<{ [address: string] : { confirmed: number; unconfirmed: number; balance: number } }>;
     getBlock(params: GetBlockParams): Promise<IBlock>;
     streamBlocks(params: StreamBlocksParams): any;
     getFee(params: GetEstimateSmartFeeParams): any;
     broadcastTransaction(params: BroadcastTransactionParams): Promise<any>;
     streamAddressUtxos(params: StreamAddressUtxosParams): any;
+    streamAddressesUtxos(params: StreamAddressesUtxosParams): any;
     streamAddressTransactions(params: StreamAddressUtxosParams): any;
+    streamAddressesTransactions(params: StreamAddressesUtxosParams): any;
     streamTransactions(params: StreamTransactionsParams): any;
     getAuthhead(params: StreamTransactionParams): Promise<AuthheadJSON | undefined>;
     getDailyTransactions(params: { chain: string; network: string }): Promise<DailyTransactionsJSON>;

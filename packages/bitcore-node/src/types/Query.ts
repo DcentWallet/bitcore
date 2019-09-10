@@ -10,4 +10,6 @@ export type StreamingFindOptions<T> = Partial<{
   sort: any;
   direction: Direction;
   limit: number;
+  offset: number | 0;
+  pagesize: number | 0;
 }>;
