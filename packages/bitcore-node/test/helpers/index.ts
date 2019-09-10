@@ -3,8 +3,6 @@ import sinon from 'sinon';
 import { BlockStorage } from '../../src/models/block';
 import { TransactionStorage } from '../../src/models/transaction';
 import { CoinStorage } from '../../src/models/coin';
-import { WalletAddressStorage } from '../../src/models/walletAddress';
-import { WalletStorage } from '../../src/models/wallet';
 import { Storage } from '../../src/services/storage';
 import { BaseModel } from '../../src/models/base';
 import { RateLimitStorage } from '../../src/models/rateLimit';
@@ -15,8 +13,6 @@ export async function resetDatabase() {
   await resetModel(BlockStorage);
   await resetModel(TransactionStorage);
   await resetModel(CoinStorage);
-  await resetModel(WalletAddressStorage);
-  await resetModel(WalletStorage);
   await resetModel(StateStorage);
   await resetModel(RateLimitStorage);
   await resetModel(EventStorage);
