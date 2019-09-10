@@ -1,5 +1,4 @@
 import { CoinStorage } from './coin';
-import { WalletAddressStorage } from './walletAddress';
 import { partition } from '../utils/partition';
 import { ObjectID } from 'bson';
 import { TransformOptions } from '../types/TransformOptions';
@@ -354,12 +353,11 @@ export class TransactionModel extends BaseModel<ITransaction> {
     height: number;
     parentChain?: string;
     forkHeight?: number;
-    initialSyncComplete: boolean;
     chain: string;
     network: string;
     mintOps?: Array<MintOp>;
   }) {
-    let { chain, height, network, parentChain, forkHeight, initialSyncComplete } = params;
+    let { chain, height, network, parentChain, forkHeight } = params;
     let mintOps = new Array<MintOp>();
     let parentChainCoinsMap = new Map();
     if (parentChain && forkHeight && height < forkHeight) {
@@ -422,31 +420,6 @@ export class TransactionModel extends BaseModel<ITransaction> {
             upsert: true,
             forceServerObjectId: true
           }
-        });
-      }
-    }
-
-    const walletConfig = Config.for('api').wallets;
-    if (initialSyncComplete || (walletConfig && walletConfig.allowCreationBeforeCompleteSync)) {
-      let mintOpsAddresses = {};
-      for (const mintOp of mintOps) {
-        mintOpsAddresses[mintOp.updateOne.update.$set.address] = true;
-      }
-      let wallets = await WalletAddressStorage.collection
-        .find({ address: { $in: Object.keys(mintOpsAddresses) }, chain, network }, { batchSize: 100 })
-        .project({ wallet: 1, address: 1 })
-        .toArray();
-      if (wallets.length) {
-        mintOps = mintOps.map(mintOp => {
-          let transformedWallets = wallets
-            .filter(wallet => wallet.address === mintOp.updateOne.update.$set.address)
-            .map(wallet => wallet.wallet);
-          mintOp.updateOne.update.$set.wallets = transformedWallets;
-          delete mintOp.updateOne.update.$setOnInsert.wallets;
-          if (!Object.keys(mintOp.updateOne.update.$setOnInsert).length) {
-            delete mintOp.updateOne.update.$setOnInsert;
-          }
-          return mintOp;
         });
       }
     }
