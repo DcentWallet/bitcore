@@ -1,6 +1,6 @@
 import { StateStorage } from '../../src/models/state';
 import sinon from 'sinon';
-import { BlockStorage } from '../../src/models/block';
+import { BitcoinBlockStorage } from '../../src/models/block';
 import { TransactionStorage } from '../../src/models/transaction';
 import { CoinStorage } from '../../src/models/coin';
 import { Storage } from '../../src/services/storage';
@@ -10,7 +10,7 @@ import { EventStorage } from '../../src/models/events';
 
 export async function resetDatabase() {
   console.log('Restting database');
-  await resetModel(BlockStorage);
+  await resetModel(BitcoinBlockStorage);
   await resetModel(TransactionStorage);
   await resetModel(CoinStorage);
   await resetModel(StateStorage);
@@ -29,6 +29,7 @@ export function mockCollection(toReturn, collectionMethods = {}) {
       aggregate: sinon.stub().returnsThis(),
       count: sinon.stub().returnsThis(),
       sort: sinon.stub().returnsThis(),
+      project: sinon.stub().returnsThis(),
       insertOne: sinon.stub().resolves(),
       insertMany: sinon.stub().resolves(),
       bulkWrite: sinon.stub().resolves(),

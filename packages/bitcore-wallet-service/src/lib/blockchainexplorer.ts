@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { V8 } from './blockchainexplorers/v8';
+import { ChainService } from './chain/index';
 
 const $ = require('preconditions').singleton();
 const Common = require('./common');
@@ -16,7 +17,15 @@ const PROVIDERS = {
     bch: {
       livenet: 'https://api.bitpay.com',
       testnet: 'https://api.bitpay.com'
-    }
+    },
+    eth: {
+      livenet: 'https://api-eth.bitcore.io',
+      testnet: 'https://api-eth.bitcore.io'
+    },
+    xrp: {
+      livenet: 'https://api-xrp.bitcore.io',
+      testnet: 'https://api-xrp.bitcore.io'
+    },
   }
 };
 
@@ -24,7 +33,7 @@ export function BlockChainExplorer(opts) {
   $.checkArgument(opts);
 
   const provider = opts.provider || 'v8';
-  const coin = opts.coin || Defaults.COIN;
+  const coin = ChainService.getChain(opts.coin || Defaults.COIN).toLowerCase();
   const network = opts.network || 'livenet';
 
   $.checkState(PROVIDERS[provider], 'Provider ' + provider + ' not supported');

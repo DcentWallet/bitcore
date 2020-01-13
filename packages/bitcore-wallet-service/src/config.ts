@@ -45,11 +45,26 @@ module.exports = {
         url: 'https://api.bitcore.io',
       },
       testnet: {
-        // url: 'http://localhost:3000',
         url: 'https://api.bitcore.io',
       },
-
     },
+    eth: {
+      livenet: {
+        url: 'https://api-eth.bitcore.io',
+      },
+      testnet: {
+        url: 'https://api-eth.bitcore.io',
+      },
+    },
+    xrp: {
+      livenet: {
+        url: 'https://api-xrp.bitcore.io',
+      },
+      testnet: {
+        url: 'https://api-xrp.bitcore.io',
+      },
+    },
+    socketApiKey: 'socketApiKey'
   },
   pushNotificationsOpts: {
     templatePath: 'templates',
@@ -66,6 +81,19 @@ module.exports = {
   maintenanceOpts: {
     maintenanceMode: false,
   },
+  staticRoot: '/tmp/static',
+  // simplex: {
+  //   sandbox: {
+  //     apiKey: 'simplex_sandbox_api_key_here',
+  //     api: 'https://sandbox.test-simplexcc.com',
+  //     appProviderId: 'simplex_provider_id_here'
+  //   },
+  //   production: {
+  //     apiKey: 'simplex_production_api_key_here',
+  //     api: 'https://backend-wallet-api.simplexcc.com',
+  //     appProviderId: 'simplex_provider_id_here'
+  //   }
+  // },
   // To use email notifications uncomment this:
   // emailOpts: {
   //  host: 'localhost',

@@ -15,6 +15,7 @@ export class ApiService {
   storageService: StorageService;
   socketService: SocketService;
   httpServer: http.Server;
+  app: typeof app;
   stopped = true;
 
   constructor({
@@ -29,6 +30,7 @@ export class ApiService {
     this.configService = configService;
     this.storageService = storageService;
     this.socketService = socketService;
+    this.app = app;
     this.httpServer = new http.Server(app);
   }
 
@@ -42,6 +44,7 @@ export class ApiService {
     }
     if (this.stopped) {
       this.stopped = false;
+      this.httpServer = new http.Server(app);
       this.httpServer.timeout = this.timeout;
       this.httpServer.listen(this.port, () => {
         logger.info(`Starting API Service on port ${this.port}`);
@@ -51,11 +54,12 @@ export class ApiService {
     return this.httpServer;
   }
 
-  stop() {
+  async stop() {
     this.stopped = true;
+    await this.socketService.stop();
     return new Promise(resolve => {
       this.httpServer.close(() => {
-        logger.info("Stopped API Service")
+        logger.info('Stopped API Service');
         resolve();
       });
       this.httpServer.emit('close');

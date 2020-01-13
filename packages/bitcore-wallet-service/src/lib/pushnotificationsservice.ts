@@ -1,6 +1,8 @@
 import * as async from 'async';
 import * as fs from 'fs';
 import _ from 'lodash';
+import 'source-map-support/register';
+
 import request from 'request';
 import { MessageBroker } from './messagebroker';
 import { INotification, IPreferences } from './model';
@@ -11,6 +13,7 @@ const defaultRequest = require('request');
 const path = require('path');
 const Utils = require('./common/utils');
 const Defaults = require('./common/defaults');
+const Constants = require('./common/constants');
 const sjcl = require('sjcl');
 const log = require('npmlog');
 log.debug = log.verbose;
@@ -368,14 +371,18 @@ export class PushNotificationsService {
     const UNIT_LABELS = {
       btc: 'BTC',
       bit: 'bits',
-      bch: 'BCH'
+      bch: 'BCH',
+      eth: 'ETH',
+      xrp: 'XRP',
+      usdc: 'USDC',
+      pax: 'PAX',
+      gusd: 'GUSD'
     };
-
     const data = _.cloneDeep(notification.data);
     data.subjectPrefix = _.trim(this.subjectPrefix + ' ');
     if (data.amount) {
       try {
-        const unit = recipient.unit.toLowerCase();
+        const unit = data.tokenAddress ? Constants.TOKEN_OPTS[data.tokenAddress.toLowerCase()].symbol.toLowerCase() : recipient.unit.toLowerCase();
         data.amount =
           Utils.formatAmount(+data.amount, unit) + ' ' + UNIT_LABELS[unit];
       } catch (ex) {

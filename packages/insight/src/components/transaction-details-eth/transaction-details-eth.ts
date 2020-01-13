@@ -1,11 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ApiProvider, ChainNetwork } from '../../providers/api/api';
 import { BlocksProvider } from '../../providers/blocks/blocks';
 import { CurrencyProvider } from '../../providers/currency/currency';
 import { RedirProvider } from '../../providers/redir/redir';
-import {
-  TxsProvider
-} from '../../providers/transactions/transactions';
+import { TxsProvider } from '../../providers/transactions/transactions';
 
 /**
  * Generated class for the TransactionDetailsEthComponent component.
@@ -17,7 +15,7 @@ import {
   selector: 'transaction-details-eth',
   templateUrl: 'transaction-details-eth.html'
 })
-export class TransactionDetailsEthComponent {
+export class TransactionDetailsEthComponent implements OnInit {
   @Input()
   public tx: any = {};
   @Input()
@@ -32,7 +30,12 @@ export class TransactionDetailsEthComponent {
     public txProvider: TxsProvider,
     public redirProvider: RedirProvider,
     public blocksProvider: BlocksProvider
-  ) {
+  ) {}
+
+  public ngOnInit(): void {
+    this.txProvider.getConfirmations(this.tx.blockheight, this.chainNetwork).subscribe((confirmations) => {
+      this.tx.confirmations = confirmations;
+    });
   }
 
   public goToTx(txId: string, vout?: number, fromVout?: boolean): void {

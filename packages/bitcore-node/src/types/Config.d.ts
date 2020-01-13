@@ -1,6 +1,7 @@
 export interface ConfigType {
   maxPoolSize: number;
   port: number;
+  dbUrl: string;
   dbHost: string;
   dbName: string;
   dbPort: string;
@@ -11,6 +12,7 @@ export interface ConfigType {
   chains: {
     [currency: string]: { [network: string]: any };
   };
+  modules: string[];
   services: {
     api: {
       disabled?: boolean;
@@ -32,6 +34,7 @@ export interface ConfigType {
     };
     socket: {
       disabled?: boolean;
+      bwsKeys: Array<string>;
     };
     storage: {
       disabled?: boolean;
