@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import { TransactionStorage, IBtcTransaction } from '../../src/models/transaction';
 import { CoinStorage } from '../../src/models/coin';
 import { ChainNetwork } from '../../src/types/ChainNetwork';
+import { WalletAddressStorage } from '../../src/models/walletAddress';
 import { Storage } from '../../src/services/storage';
 import config from '../../src/config';
 import logger from '../../src/logger';
@@ -190,6 +191,21 @@ export async function transactions(
         }
         expect(our.coinbase).to.equal(tx.coinbase);
 
+        // wallets
+        expect(tx.wallets).to.include.members(Array.from(our.wallets));
+        if (our.wallets.length > 0) {
+          const wallets = await WalletAddressStorage.collection
+            .find({
+              wallet: {
+                $in: our.wallets
+              },
+              address: our.address,
+              chain: info.chain,
+              network: info.network
+            })
+            .toArray();
+          expect(wallets.length, 'wallet exists').to.be.greaterThan(0);
+        }
       }
     }
 

@@ -16,6 +16,7 @@ export type ICoin = {
   value: number;
   address: string;
   script: Buffer;
+  wallets: Array<ObjectID>;
   spentTxid: string;
   spentHeight: number;
   confirmations?: number;
@@ -49,16 +50,16 @@ export class CoinModel extends BaseModel<ICoin> {
     this.collection.createIndex({ spentTxid: 1 }, { background: true, sparse: true });
     this.collection.createIndex({ chain: 1, network: 1, spentHeight: 1 }, { background: true });
     this.collection.createIndex(
-      { spentHeight: 1, value: 1, mintHeight: 1 },
-      { background: true }
+      { wallets: 1, spentHeight: 1, value: 1, mintHeight: 1 },
+      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
     );
     this.collection.createIndex(
-      { spentTxid: 1 },
-      { background: true }
+      { wallets: 1, spentTxid: 1 },
+      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
     );
     this.collection.createIndex(
-      { mintTxid: 1 },
-      { background: true }
+      { wallets: 1, mintTxid: 1 },
+      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
     );
   }
 
@@ -100,7 +101,7 @@ export class CoinModel extends BaseModel<ICoin> {
       { confirmed: 0, unconfirmed: 0, balance: 0 }
     );
   }
-
+  
   async getBalances(params: { query: any }, options: CollectionAggregationOptions = {}) {
     let { query } = params;
     const result = await this.collection
@@ -165,7 +166,7 @@ export class CoinModel extends BaseModel<ICoin> {
       },
       query
     );
-    return this.getBalance({ query: combinedQuery }, { hint: { spentHeight: 1, value: 1, mintHeight: 1 } });
+    return this.getBalance({ query: combinedQuery }, { hint: { wallets: 1, spentHeight: 1, value: 1, mintHeight: 1 } });
   }
 
   resolveAuthhead(mintTxid: string, chain?: string, network?: string) {
