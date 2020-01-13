@@ -3,25 +3,19 @@ import sinon from 'sinon';
 import { BitcoinBlockStorage } from '../../src/models/block';
 import { TransactionStorage } from '../../src/models/transaction';
 import { CoinStorage } from '../../src/models/coin';
-import { WalletAddressStorage } from '../../src/models/walletAddress';
-import { WalletStorage } from '../../src/models/wallet';
 import { Storage } from '../../src/services/storage';
 import { BaseModel } from '../../src/models/base';
 import { RateLimitStorage } from '../../src/models/rateLimit';
 import { EventStorage } from '../../src/models/events';
 
 export async function resetDatabase() {
-  console.log('Resetting database');
-  await Promise.all([
-    resetModel(BitcoinBlockStorage),
-    resetModel(TransactionStorage),
-    resetModel(CoinStorage),
-    resetModel(WalletAddressStorage),
-    resetModel(WalletStorage),
-    resetModel(StateStorage),
-    resetModel(RateLimitStorage),
-    resetModel(EventStorage)
-  ]);
+  console.log('Restting database');
+  await resetModel(BitcoinBlockStorage);
+  await resetModel(TransactionStorage);
+  await resetModel(CoinStorage);
+  await resetModel(StateStorage);
+  await resetModel(RateLimitStorage);
+  await resetModel(EventStorage);
 }
 
 export async function resetModel(model: BaseModel<any>) {

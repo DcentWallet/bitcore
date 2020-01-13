@@ -1,4 +1,3 @@
-import { ObjectID } from 'bson';
 import { TransformOptions } from '../types/TransformOptions';
 import { BaseModel, MongoBound } from './base';
 import { StreamingFindOptions, Storage, StorageService } from '../services/storage';
@@ -14,7 +13,6 @@ export type ITransaction = {
   blockTimeNormalized?: Date;
   fee: number;
   value: number;
-  wallets: ObjectID[];
 };
 
 export abstract class BaseTransaction<T extends ITransaction> extends BaseModel<T> {
@@ -35,12 +33,12 @@ export abstract class BaseTransaction<T extends ITransaction> extends BaseModel<
     this.collection.createIndex({ blockHash: 1 }, { background: true });
     this.collection.createIndex({ chain: 1, network: 1, blockTimeNormalized: 1 }, { background: true });
     this.collection.createIndex(
-      { wallets: 1, blockTimeNormalized: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { blockTimeNormalized: 1 },
+      { background: true }
     );
     this.collection.createIndex(
-      { wallets: 1, blockHeight: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { blockHeight: 1 },
+      { background: true }
     );
   }
 

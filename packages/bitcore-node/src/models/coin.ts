@@ -16,7 +16,6 @@ export type ICoin = {
   value: number;
   address: string;
   script: Buffer;
-  wallets: Array<ObjectID>;
   spentTxid: string;
   spentHeight: number;
   confirmations?: number;
@@ -50,16 +49,16 @@ export class CoinModel extends BaseModel<ICoin> {
     this.collection.createIndex({ spentTxid: 1 }, { background: true, sparse: true });
     this.collection.createIndex({ chain: 1, network: 1, spentHeight: 1 }, { background: true });
     this.collection.createIndex(
-      { wallets: 1, spentHeight: 1, value: 1, mintHeight: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { spentHeight: 1, value: 1, mintHeight: 1 },
+      { background: true }
     );
     this.collection.createIndex(
-      { wallets: 1, spentTxid: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { spentTxid: 1 },
+      { background: true }
     );
     this.collection.createIndex(
-      { wallets: 1, mintTxid: 1 },
-      { background: true, partialFilterExpression: { 'wallets.0': { $exists: true } } }
+      { mintTxid: 1 },
+      { background: true }
     );
   }
 
@@ -102,6 +101,48 @@ export class CoinModel extends BaseModel<ICoin> {
     );
   }
 
+  async getBalances(params: { query: any }, options: CollectionAggregationOptions = {}) {
+    let { query } = params;
+    const result = await this.collection
+      .aggregate<{ _id: string; balance: number; address: string }>(
+        [
+          { $match: query },
+          {
+            $project: {
+              address: 1,
+              value: 1,
+              status: {
+                $cond: {
+                  if: { $gte: ['$mintHeight', SpentHeightIndicators.minimum] },
+                  then: 'confirmed',
+                  else: 'unconfirmed'
+                }
+              },
+              _id: 0
+            }
+          },
+          {
+            $group: {
+              address: '$address',
+              _id: '$status',
+              balance: { $sum: '$value' }
+            }
+          }
+        ],
+        options
+      )
+      .toArray();
+    return result.reduce<{ [address : string] : { confirmed: number; unconfirmed: number; balance: number } }>(
+      (acc, cur) => {
+        acc[cur.address] = acc[cur.address] || {}
+        acc[cur.address][cur._id] = cur.balance;
+        acc[cur.address].balance += cur.balance;
+        return acc;
+      },
+      {}
+    );
+  }
+
   async getBalanceAtTime(params: { query: any; time: string; chain: string; network: string }) {
     let { query, time, chain, network } = params;
     const [block] = await BitcoinBlockStorage.collection
@@ -124,7 +165,7 @@ export class CoinModel extends BaseModel<ICoin> {
       },
       query
     );
-    return this.getBalance({ query: combinedQuery }, { hint: { wallets: 1, spentHeight: 1, value: 1, mintHeight: 1 } });
+    return this.getBalance({ query: combinedQuery }, { hint: { spentHeight: 1, value: 1, mintHeight: 1 } });
   }
 
   resolveAuthhead(mintTxid: string, chain?: string, network?: string) {

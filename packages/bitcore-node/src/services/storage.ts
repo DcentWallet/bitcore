@@ -233,6 +233,38 @@ export class StorageService {
     if (options.sort) {
       cursor = cursor.sort(options.sort);
     }
+    if (options.pagesize) {
+      cursor = cursor.skip(options.offset ? options.offset : 0)
+        .limit(options.pagesize)
+    }
+    
+    return this.apiStream(cursor, req, res);
+  }
+
+  transactionStreamingFind<T>(
+    model: TransformableModel<T>,
+    originalQuery: any,
+    originalOptions: StreamingFindOptions<T>,
+    req: Request,
+    res: Response,
+    transform?: (data: T) => string | Buffer
+  ) {
+    const { query, options } = this.getFindOptions(model, originalOptions);
+    const finalQuery = Object.assign({}, originalQuery, query);
+    let cursor = model.collection
+      .find(finalQuery, options)
+      .addCursorFlag('noCursorTimeout', true)
+      .stream({
+        transform: transform || model._apiTransform
+      });
+    if (options.sort) {
+      cursor = cursor.sort(options.sort);
+    }
+    if (options.pagesize) {
+      cursor = cursor.skip(options.offset ? options.offset : 0)
+        .limit(options.pagesize)
+    }
+    
     return this.apiStream(cursor, req, res);
   }
 }
