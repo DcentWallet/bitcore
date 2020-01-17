@@ -3,7 +3,7 @@ import { ObjectID } from 'bson';
 import logger from '../../../logger';
 import { LoggifyClass } from '../../../decorators/Loggify';
 import { IEthTransaction, EthTransactionJSON } from '../types';
-import { StorageService, Storage } from '../../../services/storage';
+import { StorageService, Storage, secondaryPreferrence } from '../../../services/storage';
 import { partition } from '../../../utils/partition';
 import { TransformOptions } from '../../../types/TransformOptions';
 import { MongoBound } from '../../../models/base';
@@ -114,7 +114,9 @@ export class EthTransactionModel extends BaseTransaction<IEthTransaction> {
     let { blockTimeNormalized, chain, height, network, parentChain, forkHeight } = params;
     if (parentChain && forkHeight && height < forkHeight) {
       const parentTxs = await EthTransactionStorage.collection
-        .find({ blockHeight: height, chain: parentChain, network })
+        .find({ blockHeight: height, chain: parentChain, network }, {
+          readPreference: secondaryPreferrence
+        })
         .toArray();
       return parentTxs.map(parentTx => {
         return {

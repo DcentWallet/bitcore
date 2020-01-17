@@ -7,7 +7,7 @@ import { TransformOptions } from '../types/TransformOptions';
 import { LoggifyClass } from '../decorators/Loggify';
 import { Bitcoin } from '../types/namespaces/Bitcoin';
 import { MongoBound } from './base';
-import { StorageService } from '../services/storage';
+import { StorageService, secondaryPreferrence } from '../services/storage';
 import { TransactionJSON } from '../types/Transaction';
 import { SpentHeightIndicators } from '../types/Coin';
 import { Config } from '../services/config';
@@ -283,7 +283,9 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
     } = params;
     if (parentChain && forkHeight && height < forkHeight) {
       const parentTxs = await TransactionStorage.collection
-        .find({ blockHeight: height, chain: parentChain, network })
+        .find({ blockHeight: height, chain: parentChain, network }, {
+          readPreference: secondaryPreferrence
+        })
         .toArray();
       params.txStream.push(
         parentTxs.map(parentTx => {
@@ -323,7 +325,9 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
         spentQuery = { spentTxid: { $in: params.txs.map(tx => tx._hash) }, chain, network };
       }
       const spent = await CoinStorage.collection
-        .find(spentQuery)
+        .find(spentQuery, {
+          readPreference: secondaryPreferrence
+        })
         .project({ spentTxid: 1, value: 1, wallets: 1 })
         .toArray();
       type CoinGroup = { [txid: string]: { total: number; wallets: Array<ObjectID> } };
@@ -470,6 +474,8 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
           network,
           mintHeight: height,
           $or: [{ spentHeight: { $lt: SpentHeightIndicators.minimum } }, { spentHeight: { $gte: forkHeight } }]
+        }, {
+          readPreference: secondaryPreferrence
         })
         .project({ mintTxid: 1, mintIndex: 1 })
         .toArray();
@@ -605,6 +611,8 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
         network,
         spentHeight: SpentHeightIndicators.pending,
         mintTxid: { $in: spendOps.map(s => s.updateOne.filter.mintTxid) }
+      }, {
+        readPreference: secondaryPreferrence
       })
       .project({ mintTxid: 1, mintIndex: 1, spentTxid: 1 })
       .toArray();
