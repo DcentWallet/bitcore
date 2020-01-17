@@ -224,7 +224,7 @@ export class StorageService {
     const finalQuery = Object.assign({}, originalQuery, query);
     let cursor = model.collection
       .find(finalQuery, options)
-      .addCursorFlag('noCursorTimeout', true)
+      // .addCursorFlag('noCursorTimeout', true)
       .stream({
         transform: transform || model._apiTransform.bind(model)
       });
@@ -251,7 +251,7 @@ export class StorageService {
     const finalQuery = Object.assign({}, originalQuery, query);
     let cursor = model.collection
       .find(finalQuery, options)
-      .addCursorFlag('noCursorTimeout', true)
+      // .addCursorFlag('noCursorTimeout', true)
       .stream({
         transform: transform || model._apiTransform
       });

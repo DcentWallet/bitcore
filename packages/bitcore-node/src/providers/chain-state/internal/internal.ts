@@ -55,7 +55,7 @@ export class InternalStateProvider implements CSP.IChainStateService {
       throw 'Missing required param';
     }
     const addressquery = {
-      $all: address
+      $in: address
     }
     const query = { chain: chain, network: network.toLowerCase(), address: addressquery } as any;
     if (args.unspent) {
