@@ -96,12 +96,12 @@ router.get('/:blockHash/coins/:limit/:pgnum', async function(req: Request, res: 
 
     let inputs = await CoinStorage.collection
       .find({ chain, network, spentTxid: { $in: txids } })
-      .addCursorFlag('noCursorTimeout', true)
+      //.addCursorFlag('noCursorTimeout', true)
       .toArray();
 
     let outputs = await CoinStorage.collection
       .find({ chain, network, mintTxid: { $in: txids } })
-      .addCursorFlag('noCursorTimeout', true)
+      //.addCursorFlag('noCursorTimeout', true)
       .toArray();
 
     let prevPageNum;

@@ -35,7 +35,7 @@ export class WalletModel extends BaseModel<IWallet> {
   async updateCoins(wallet: IWallet) {
     let addressModels = await WalletAddressStorage.collection
       .find({ wallet: wallet._id })
-      .addCursorFlag('noCursorTimeout', true)
+      //.addCursorFlag('noCursorTimeout', true)
       .toArray();
     let addresses = addressModels.map(model => model.address);
     return WalletAddressStorage.updateCoins({ wallet, addresses });

@@ -27,7 +27,7 @@ export class ListTransactionsStream extends Transform {
           { batchSize: 10000 }
         )
         .project({ address: 1, wallets: 1, value: 1, mintIndex: 1 })
-        .addCursorFlag('noCursorTimeout', true)
+        //.addCursorFlag('noCursorTimeout', true)
         .toArray();
       outputs.forEach((output) => {
         const sendingToOurself = output.wallets.some((outputWallet) => {
@@ -85,7 +85,7 @@ export class ListTransactionsStream extends Transform {
         mintTxid: transaction.txid
       })
         .project({ address: 1, wallets: 1, value: 1, mintIndex: 1 })
-        .addCursorFlag('noCursorTimeout', true)
+        //.addCursorFlag('noCursorTimeout', true)
         .toArray();
       outputs.forEach((output) => {
         const weReceived = output.wallets.some((outputWallet) => {

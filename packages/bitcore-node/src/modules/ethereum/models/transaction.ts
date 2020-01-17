@@ -192,7 +192,8 @@ export class EthTransactionModel extends BaseTransaction<IEthTransaction> {
     let originalQuery = params.query;
     const { query, options } = Storage.getFindOptions(this, params.options);
     const finalQuery = Object.assign({}, originalQuery, query);
-    return this.collection.find(finalQuery, options).addCursorFlag('noCursorTimeout', true);
+    return this.collection.find(finalQuery, options);
+    //.addCursorFlag('noCursorTimeout', true);
   }
 
   abiDecode(input: string) {

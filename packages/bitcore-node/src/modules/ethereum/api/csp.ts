@@ -287,7 +287,7 @@ export class ETHStateProvider extends InternalStateProvider implements CSP.IChai
       transactionStream = EthTransactionStorage.collection
         .find(query)
         .sort({ blockTimeNormalized: 1 })
-        .addCursorFlag('noCursorTimeout', true);
+        //.addCursorFlag('noCursorTimeout', true);
     } else {
       const walletAddresses = await this.getWalletAddresses(wallet._id!);
       const query = {
@@ -314,7 +314,7 @@ export class ETHStateProvider extends InternalStateProvider implements CSP.IChai
       transactionStream = EthTransactionStorage.collection
         .find(query)
         .sort({ blockTimeNormalized: 1 })
-        .addCursorFlag('noCursorTimeout', true)
+        //.addCursorFlag('noCursorTimeout', true)
         .pipe(
           new Transform({
             objectMode: true,
@@ -422,7 +422,8 @@ export class ETHStateProvider extends InternalStateProvider implements CSP.IChai
 
   async getBlocks(params: CSP.GetBlockParams) {
     const { query, options } = this.getBlocksQuery(params);
-    let cursor = EthBlockStorage.collection.find(query, options).addCursorFlag('noCursorTimeout', true);
+    let cursor = EthBlockStorage.collection.find(query, options);
+    //.addCursorFlag('noCursorTimeout', true);
     if (options.sort) {
       cursor = cursor.sort(options.sort);
     }
