@@ -4,7 +4,7 @@ import { TransformableModel } from '../types/TransformableModel';
 import logger from '../logger';
 import { LoggifyClass } from '../decorators/Loggify';
 import { ObjectID } from 'mongodb';
-import { MongoClient, Db, Cursor } from 'mongodb';
+import { MongoClient, Db, Cursor, ReadPreference } from 'mongodb';
 import '../models';
 import { StreamingFindOptions } from '../types/Query';
 import { ConfigType } from '../types/Config';
@@ -186,7 +186,7 @@ export class StorageService {
     let query: any = {};
     let since: any = null;
     let options: StreamingFindOptions<T> = {};
-
+    options.readPreference = ReadPreference.SECONDARY_PREFERRED
     if (originalOptions.sort) {
       options.sort = originalOptions.sort;
     }
@@ -268,3 +268,4 @@ export class StorageService {
 }
 
 export let Storage = new StorageService();
+export const secondaryPreferrence = ReadPreference.SECONDARY_PREFERRED

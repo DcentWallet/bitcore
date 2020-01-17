@@ -12,4 +12,5 @@ export type StreamingFindOptions<T> = Partial<{
   limit: number;
   offset: number | 0;
   pagesize: number | 0;
+  readPreference: string | undefined;
 }>;

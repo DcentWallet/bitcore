@@ -7,7 +7,7 @@ import { Bitcoin } from '../types/namespaces/Bitcoin';
 import { MongoBound } from './base';
 import { SpentHeightIndicators } from '../types/Coin';
 import { EventStorage } from './events';
-import { StorageService } from '../services/storage';
+import { StorageService, secondaryPreferrence } from '../services/storage';
 import { BaseBlock, IBlock } from './baseBlock';
 
 export type IBtcBlock = IBlock & {
@@ -55,7 +55,13 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     const convertedBlock = blockOp.updateOne.update.$set;
     const { height, timeNormalized, time } = convertedBlock;
 
-    const previousBlock = await this.collection.findOne({ hash: convertedBlock.previousBlockHash, chain, network });
+    const previousBlock = await this.collection.findOne({
+      hash: convertedBlock.previousBlockHash,
+      chain,
+      network
+    }, {
+      readPreference: secondaryPreferrence
+    });
 
     await this.collection.bulkWrite([blockOp]);
     if (previousBlock) {
