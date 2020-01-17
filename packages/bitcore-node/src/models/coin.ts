@@ -40,9 +40,10 @@ export class CoinModel extends BaseModel<ICoin> {
       { address: 1, chain: 1, network: 1 },
       {
         background: true,
-        partialFilterExpression: {
-          spentHeight: { $lt: 0 }
-        }
+        // partialFilterExpression: {
+        //   spentHeight: { $lt: 0 }
+        // }
+
       }
     );
     this.collection.createIndex({ address: 1 }, { background: true });
