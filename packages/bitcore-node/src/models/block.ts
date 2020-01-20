@@ -97,7 +97,9 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     const header = block.header.toObject();
     const blockTime = header.time * 1000;
 
-    const previousBlock = await this.collection.findOne({ hash: header.prevHash, chain, network });
+    const previousBlock = await this.collection.findOne({ hash: header.prevHash, chain, network }, {
+      readPreference: secondaryPreferrence
+    });
 
     const blockTimeNormalized = (() => {
       const prevTime = previousBlock ? new Date(previousBlock.timeNormalized) : null;

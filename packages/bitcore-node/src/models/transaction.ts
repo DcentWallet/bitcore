@@ -424,7 +424,8 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
       for (let mintOp of mintBatch) {
         addressBatch.add(mintOp.updateOne.update.$set.address);
         if (addressBatch.size >= 1000) {
-          const batchWallets = await findWalletsForAddresses(Array.from(addressBatch));
+          //const batchWallets = await findWalletsForAddresses(Array.from(addressBatch));
+          const batchWallets = [];
           wallets = wallets.concat(batchWallets);
           addressBatch.clear();
         }
