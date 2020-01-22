@@ -55,6 +55,8 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     const convertedBlock = blockOp.updateOne.update.$set;
     const { height, timeNormalized, time } = convertedBlock;
 
+    const bulkwrite = this.collection.bulkWrite([blockOp]);
+
     const previousBlock = await this.collection.findOne({
       hash: convertedBlock.previousBlockHash,
       chain,
@@ -62,17 +64,18 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     }, {
       readPreference: secondaryPreferrence
     });
-
-    await this.collection.bulkWrite([blockOp]);
+    let updateone;
     if (previousBlock) {
-      await this.collection.updateOne(
+      updateone = this.collection.updateOne(
         { chain, network, hash: previousBlock.hash },
         { $set: { nextBlockHash: convertedBlock.hash } }
       );
       logger.debug('Updating previous block.nextBlockHash ', convertedBlock.hash);
+    } else {
+      updateone = Promise.resolve();
     }
 
-    await TransactionStorage.batchImport({
+    const transaction = TransactionStorage.batchImport({
       txs: block.transactions,
       blockHash: convertedBlock.hash,
       blockTime: new Date(time),
@@ -84,11 +87,10 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
       forkHeight,
       initialSyncComplete
     });
-
     if (initialSyncComplete) {
       EventStorage.signalBlock(convertedBlock);
     }
-
+    await Promise.all([bulkwrite, updateone, transaction]);
     await this.collection.updateOne({ hash: convertedBlock.hash, chain, network }, { $set: { processed: true } });
   }
 
