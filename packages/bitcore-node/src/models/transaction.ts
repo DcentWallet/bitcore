@@ -611,7 +611,7 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
         chain,
         network,
         spentHeight: SpentHeightIndicators.pending,
-        mintTxid: { $in: spendOps.map(s => s.updateOne.filter.mintTxid) }
+        mintTxid: { $in: [...(new Set(spendOps.map(s => s.updateOne.filter.mintTxid)))] }
       }, {
         readPreference: secondaryPreferrence
       })

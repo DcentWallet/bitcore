@@ -43,7 +43,6 @@ export class CoinModel extends BaseModel<ICoin> {
           // partialFilterExpression: {
           //   spentHeight: { $lt: 0 }
           // }
-  
         }
       );
     }).then(() => {

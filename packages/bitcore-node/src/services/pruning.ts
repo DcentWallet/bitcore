@@ -50,7 +50,7 @@ export class PruningService {
     const txs = await this.transactionModel.collection.find({ chain, network, blockHeight: -3 }).toArray();
     for (let groups of partition(txs, 1000)) {
       const updated = await this.coinModel.collection.updateMany(
-        { chain, network, mintTxid: { $in: groups.map(tx => tx.txid) }, mintHeight: -1 },
+        { chain, network, mintTxid: { $in: [...(new Set(groups.map(tx => tx.txid)))] }, mintHeight: -1 },
         { $set: { mintHeight: -3 } }
       );
       logger.info('Mempool coins updated', updated);
