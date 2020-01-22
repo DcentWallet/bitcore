@@ -232,7 +232,7 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
     });
 
     this.streamMintOps({ ...params, mintStream });
-    await new Promise(r =>
+    const mint = new Promise(r =>
       mintStream
         .pipe(new MempoolSafeTransform(height))
         .pipe(new MongoWriteStream(CoinStorage.collection))
@@ -241,7 +241,7 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
     );
 
     this.streamSpendOps({ ...params, spentStream });
-    await new Promise(r =>
+    const spend = new Promise(r =>
       spentStream
         .pipe(new MongoWriteStream(CoinStorage.collection))
         .pipe(new PruneMempoolStream(chain, network, initialSyncComplete))
@@ -249,13 +249,14 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
     );
 
     this.streamTxOps({ ...params, txs: params.txs as TaggedBitcoinTx[], txStream });
-    await new Promise(r =>
+    const tx = new Promise(r =>
       txStream
         .pipe(new MempoolSafeTransform(height))
         .pipe(new MongoWriteStream(TransactionStorage.collection))
         .pipe(new MempoolTxEventTransform(height))
         .on('finish', r)
     );
+    await Promise.all([mint, spend, tx])
   }
 
   async streamTxOps(params: {
