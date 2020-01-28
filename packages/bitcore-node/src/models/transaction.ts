@@ -1,6 +1,6 @@
 import logger from '../logger';
 import * as lodash from 'lodash';
-import { CoinStorage } from './coin';
+import { CoinStorage, ICoin } from './coin';
 import { WalletAddressStorage, IWalletAddress } from './walletAddress';
 import { ObjectID } from 'bson';
 import { TransformOptions } from '../types/TransformOptions';
@@ -24,7 +24,7 @@ const { onlyWalletEvents } = Config.get().services.event;
 function shouldFire(obj: { wallets?: Array<ObjectID> }) {
   return !onlyWalletEvents || (onlyWalletEvents && obj.wallets && obj.wallets.length > 0);
 }
-const MAX_BATCH_SIZE = 200000;
+const MAX_BATCH_SIZE = 1000;
 
 export type IBtcTransaction = ITransaction & {
   coinbase: boolean;
@@ -321,18 +321,19 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
         })
       );
     } else {
-      let spentQuery;
-      if (height > 0) {
-        spentQuery = { spentHeight: height, chain, network };
-      } else {
-        spentQuery = { spentTxid: { $in: params.txs.map(tx => tx._hash) }, chain, network };
-      }
-      const spent = await CoinStorage.collection
-        .find(spentQuery, {
-          readPreference: secondaryPreferrence
-        })
-        .project({ spentTxid: 1, value: 1, wallets: 1 })
-        .toArray();
+      // let spentQuery;
+      // if (height > 0) {
+      //   spentQuery = { spentHeight: height, chain, network };
+      // } else {
+      //   spentQuery = { spentTxid: { $in: params.txs.map(tx => tx._hash) }, chain, network };
+      // }
+      const spent: ICoin[] = []
+      // await CoinStorage.collection
+      //   .find(spentQuery, {
+      //     readPreference: secondaryPreferrence
+      //   })
+      //   .project({ spentTxid: 1, value: 1, wallets: 1 })
+      //   .toArray();
       type CoinGroup = { [txid: string]: { total: number; wallets: Array<ObjectID> } };
       const groupedSpends = spent.reduce<CoinGroup>((agg, coin) => {
         if (!agg[coin.spentTxid]) {
