@@ -55,19 +55,6 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     const convertedBlock = blockOp.updateOne.update.$set;
     const { height, timeNormalized, time } = convertedBlock;
 
-    const transaction = TransactionStorage.batchImport({
-      txs: block.transactions,
-      blockHash: convertedBlock.hash,
-      blockTime: new Date(time),
-      blockTimeNormalized: new Date(timeNormalized),
-      height: height,
-      chain,
-      network,
-      parentChain,
-      forkHeight,
-      initialSyncComplete
-    });
-
     const bulkwrite = this.collection.bulkWrite([blockOp]);
 
     let updateone = this.collection.findOne({
@@ -85,6 +72,20 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
       }
       return Promise.resolve(null)
     })
+    
+    const transaction = TransactionStorage.batchImport({
+      txs: block.transactions,
+      blockHash: convertedBlock.hash,
+      blockTime: new Date(time),
+      blockTimeNormalized: new Date(timeNormalized),
+      height: height,
+      chain,
+      network,
+      parentChain,
+      forkHeight,
+      initialSyncComplete
+    });
+
     if (initialSyncComplete) {
       EventStorage.signalBlock(convertedBlock);
     }
