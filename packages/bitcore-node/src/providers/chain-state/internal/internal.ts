@@ -7,7 +7,7 @@ import { BitcoinBlockStorage, IBtcBlock } from '../../../models/block';
 import { WalletStorage, IWallet } from '../../../models/wallet';
 import { WalletAddressStorage, IWalletAddress } from '../../../models/walletAddress';
 import { CSP } from '../../../types/namespaces/ChainStateProvider';
-import { Storage } from '../../../services/storage';
+import { Storage, secondaryPreferrence } from '../../../services/storage';
 import { RPC } from '../../../rpc';
 import { LoggifyClass } from '../../../decorators/Loggify';
 import { TransactionStorage, ITransaction } from '../../../models/transaction';
@@ -610,7 +610,7 @@ export class InternalStateProvider implements CSP.IChainStateService {
             network
           };
     const locatorBlocks = await BitcoinBlockStorage.collection
-      .find(query, { sort: { height: -1 }, limit: 30 })
+      .find(query, { sort: { height: -1 }, limit: 30, readPreference: secondaryPreferrence })
       //.addCursorFlag('noCursorTimeout', true)
       .toArray();
     if (locatorBlocks.length < 2) {
