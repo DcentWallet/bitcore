@@ -70,10 +70,21 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
 
     const bulkwrite = this.collection.bulkWrite([blockOp]);
 
-    let updateone = this.collection.updateOne(
-      { chain, network, hash: convertedBlock.previousBlockHash },
-      { $set: { nextBlockHash: convertedBlock.hash } }
-    );
+    let updateone = this.collection.findOne({
+      hash: convertedBlock.previousBlockHash,
+      chain,
+      network
+    }, {
+      readPreference: secondaryPreferrence
+    }).then((previousBlock) => {
+      if(previousBlock){
+        return this.collection.updateOne(
+          { chain, network, hash: convertedBlock.previousBlockHash },
+          { $set: { nextBlockHash: convertedBlock.hash } }
+        );
+      }
+      return Promise.resolve(null)
+    })
     if (initialSyncComplete) {
       EventStorage.signalBlock(convertedBlock);
     }
