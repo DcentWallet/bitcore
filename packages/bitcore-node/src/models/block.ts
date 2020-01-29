@@ -163,6 +163,8 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
         logger.error(`Previous block isn't in the DB need to roll back until we have a block in common`);
       }
       logger.debug(`Resetting tip to ${localTip.height - 1}`, { chain, network });
+    } else {
+      logger.error(`header doesnt exist. force reorg`);
     }
     const reorgOps = [
       this.collection.deleteMany({ chain, network, height: { $gte: localTip.height } }),
