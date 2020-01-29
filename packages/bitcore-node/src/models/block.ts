@@ -150,7 +150,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
   async handleReorg(params: { header?: Bitcoin.Block.HeaderObj; chain: string; network: string }): Promise<boolean> {
     const { header, chain, network } = params;
     let localTip = await this.getLocalTip(params);
-    logger.info(`Local Tip: ${localTip}`)
+    logger.info(`Local Tip: `, {localTip})
     if (header && localTip && localTip.hash === header.prevHash) {
       return false;
     }

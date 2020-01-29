@@ -272,7 +272,7 @@ export class BitcoinP2PWorker extends BaseP2PWorker<IBtcBlock> {
     let headers = await getHeaders();
     while (headers.length > 0) {
       tip = await ChainStateProvider.getLocalTip({ chain, network });
-      logger.info(`sync Tip: ${tip}`)
+      logger.info(`sync Tip: `, {tip})
       let currentHeight = tip ? tip.height : 0;
       const startingHeight = currentHeight;
       const startingTime = Date.now();
