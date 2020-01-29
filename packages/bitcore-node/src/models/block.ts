@@ -111,7 +111,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     })();
 
     const height = (previousBlock && previousBlock.height + 1) || 1;
-    logger.debug('Setting blockheight: ' + height);
+    logger.info('Setting blockheight: ' + height);
 
     const convertedBlock: IBtcBlock = {
       chain,
@@ -149,6 +149,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
   async handleReorg(params: { header?: Bitcoin.Block.HeaderObj; chain: string; network: string }): Promise<boolean> {
     const { header, chain, network } = params;
     let localTip = await this.getLocalTip(params);
+    logger.info(`${header}, ${localTip.hash}`);
     if (header && localTip && localTip.hash === header.prevHash) {
       return false;
     }
