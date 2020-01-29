@@ -1,7 +1,7 @@
 import { TransformOptions } from '../types/TransformOptions';
 import { BaseModel, MongoBound } from './base';
 import { IBlock } from '../types/Block';
-import { StorageService } from '../services/storage';
+import { StorageService, secondaryPreferrence  } from '../services/storage';
 
 export type IBlock = {
   chain: string;
@@ -45,7 +45,7 @@ export abstract class BaseBlock<T extends IBlock> extends BaseModel<T> {
   }
 
   async getLocalTip({ chain, network }) {
-    const tip = await this.collection.findOne({ chain, network, processed: true }, { sort: { height: -1 } });
+    const tip = await this.collection.findOne({ chain, network, processed: true }, { sort: { height: -1 }, readPreference: secondaryPreferrence });
     return tip as IBlock;
   }
 

@@ -70,8 +70,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
 
     const bulkwrite = this.collection.bulkWrite([blockOp]);
 
-    let updateone;
-    updateone = this.collection.updateOne(
+    let updateone = this.collection.updateOne(
       { chain, network, hash: convertedBlock.previousBlockHash },
       { $set: { nextBlockHash: convertedBlock.hash } }
     );
