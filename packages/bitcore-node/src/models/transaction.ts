@@ -25,6 +25,7 @@ function shouldFire(obj: { wallets?: Array<ObjectID> }) {
   return !onlyWalletEvents || (onlyWalletEvents && obj.wallets && obj.wallets.length > 0);
 }
 const MAX_BATCH_SIZE = 100000;
+const MAX_FIND_SIZE = 10;
 
 export type IBtcTransaction = ITransaction & {
   coinbase: boolean;
@@ -610,17 +611,20 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
     if (!initialSyncComplete || !spendOps.length) {
       return;
     }
-    let coins = await CoinStorage.collection
+    let promiseMap = partition(spendOps, spendOps.length / MAX_FIND_SIZE).map(s => {
+      return CoinStorage.collection
       .find({
         chain,
         network,
         spentHeight: SpentHeightIndicators.pending,
-        mintTxid: { $in: [...(new Set(spendOps.map(s => s.updateOne.filter.mintTxid)))] }
+        mintTxid: { $in: [...(new Set(s.map(t => t.updateOne.filter.mintTxid)))] }
       }, {
         readPreference: secondaryPreferrence
       })
       .project({ mintTxid: 1, mintIndex: 1, spentTxid: 1 })
       .toArray();
+    })
+    let coins = await (await Promise.all(promiseMap)).flat()
     coins = coins.filter(
       c =>
         spendOps.findIndex(
