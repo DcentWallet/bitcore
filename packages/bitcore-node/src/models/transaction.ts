@@ -624,7 +624,7 @@ export class TransactionModel extends BaseTransaction<IBtcTransaction> {
       .project({ mintTxid: 1, mintIndex: 1, spentTxid: 1 })
       .toArray();
     })
-    let coins = await (await Promise.all(promiseMap)).flat()
+    let coins = (await Promise.all(promiseMap)).reduce((acc, val) => acc.concat(val), []);
     coins = coins.filter(
       c =>
         spendOps.findIndex(
