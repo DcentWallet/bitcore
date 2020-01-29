@@ -46,13 +46,17 @@ export class CoinModel extends BaseModel<ICoin> {
         }
       );
     }).then(() => {
-      this.collection.createIndex({ address: 1 }, { background: true });
+      this.collection.createIndex({ address: 1, chain: 1, network: 1 }, { background: true });
     }).then(() => {
       this.collection.createIndex({ mintHeight: 1, chain: 1, network: 1 }, { background: true });
     }).then(() => {
       this.collection.createIndex({ spentTxid: 1 }, { background: true, sparse: true });
     }).then(() => {
       this.collection.createIndex({ spentHeight: 1, chain: 1, network: 1 }, { background: true });
+    }).then(() => {
+      this.collection.createIndex({ spentTxid: 1, chain: 1, network: 1 }, { background: true });
+    }).then(() => {
+      this.collection.createIndex({ mintTxid: 1, spentHeight: 1, chain: 1, network: 1 }, { background: true });
     })
     // this.collection.createIndex(
     //   { wallets: 1, spentHeight: 1, value: 1, mintHeight: 1 },
