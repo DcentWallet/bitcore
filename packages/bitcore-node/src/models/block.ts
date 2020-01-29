@@ -79,7 +79,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     }).then((previousBlock) => {
       if(previousBlock){
         return this.collection.updateOne(
-          { chain, network, hash: convertedBlock.previousBlockHash },
+          { chain, network, hash: previousBlock.hash },
           { $set: { nextBlockHash: convertedBlock.hash } }
         );
       }
