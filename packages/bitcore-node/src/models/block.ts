@@ -149,7 +149,6 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
   async handleReorg(params: { header?: Bitcoin.Block.HeaderObj; chain: string; network: string }): Promise<boolean> {
     const { header, chain, network } = params;
     let localTip = await this.getLocalTip(params);
-    logger.info(`${header}, ${localTip.hash}`);
     if (header && localTip && localTip.hash === header.prevHash) {
       return false;
     }
@@ -163,7 +162,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
       } else {
         logger.error(`Previous block isn't in the DB need to roll back until we have a block in common`);
       }
-      logger.info(`Resetting tip to ${localTip.height - 1}`, { chain, network });
+      logger.debug(`Resetting tip to ${localTip.height - 1}`, { chain, network });
     }
     const reorgOps = [
       this.collection.deleteMany({ chain, network, height: { $gte: localTip.height } }),

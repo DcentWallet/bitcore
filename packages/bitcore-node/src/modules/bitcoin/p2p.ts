@@ -277,7 +277,7 @@ export class BitcoinP2PWorker extends BaseP2PWorker<IBtcBlock> {
       const startingTime = Date.now();
       let lastLog = startingTime;
       logger.info(`${timestamp()} | Syncing ${headers.length} blocks | Chain: ${chain} | Network: ${network}`);
-      for (const header of headers) {
+      for await (const header of headers) {
         try {
           const block = await this.getBlock(header.hash);
           await this.processBlock(block);
