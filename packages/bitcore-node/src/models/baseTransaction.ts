@@ -31,7 +31,7 @@ export abstract class BaseTransaction<T extends ITransaction> extends BaseModel<
 
   onConnect() {
     this.collection.createIndex({ txid: 1 }, { background: true }).then(() => {
-      this.collection.createIndex({ chain: 1, network: 1, blockHeight: 1 }, { background: true })
+      this.collection.createIndex({ blockHeight: 1, chain: 1, network: 1 }, { background: true })
     }).then(() => {
       this.collection.createIndex({ blockHash: 1 }, { background: true });
     }).then(() => {
