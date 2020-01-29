@@ -24,7 +24,7 @@ const { onlyWalletEvents } = Config.get().services.event;
 function shouldFire(obj: { wallets?: Array<ObjectID> }) {
   return !onlyWalletEvents || (onlyWalletEvents && obj.wallets && obj.wallets.length > 0);
 }
-const MAX_BATCH_SIZE = 1000;
+const MAX_BATCH_SIZE = 100000;
 
 export type IBtcTransaction = ITransaction & {
   coinbase: boolean;
