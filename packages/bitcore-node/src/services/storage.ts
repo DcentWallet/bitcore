@@ -38,6 +38,7 @@ export class StorageService {
         return MongoClient.connect(
           connectUrl,
           {
+            poolSize: 20,
             useNewUrlParser: true
           }
         );
