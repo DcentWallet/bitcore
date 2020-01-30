@@ -45,9 +45,8 @@ export abstract class BaseBlock<T extends IBlock> extends BaseModel<T> {
   }
 
   async getLocalTip({ chain, network }) {
-    const tip = await this.collection.find({ chain, network, processed: true }, { limit: 1, sort: { height: -1 }, readPreference: secondaryPreferrence })
-      .toArray();
-    return tip.length > 0 ? tip[0] as IBlock : null;
+    const tip = await this.collection.findOne({ chain, network, processed: true }, { sort: { height: -1 }, readPreference: secondaryPreferrence });
+    return tip as IBlock;
   }
 
   abstract _apiTransform(block: T | Partial<MongoBound<T>>, options?: TransformOptions): any;
