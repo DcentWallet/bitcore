@@ -92,7 +92,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     if (initialSyncComplete) {
       EventStorage.signalBlock(convertedBlock);
     }
-    
+
     await this.collection.updateOne({ hash: convertedBlock.hash, chain, network }, { $set: { processed: true } });
   }
 
@@ -115,7 +115,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     })();
 
     const height = (previousBlock && previousBlock.height + 1) || 1;
-    logger.info('Setting blockheight: ' + height + `block hash : ${block.hash}, ${header.prevHash}`);
+    //logger.info('Setting blockheight: ' + height + `block hash : ${block.hash}, ${header.prevHash}`);
 
     const convertedBlock: IBtcBlock = {
       chain,
@@ -162,7 +162,6 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
       await wait(50);
       count++;
     }
-    logger.info(`Local Tip: `, {localTip})
     if (header && localTip && localTip.hash === header.prevHash) {
       return false;
     }
