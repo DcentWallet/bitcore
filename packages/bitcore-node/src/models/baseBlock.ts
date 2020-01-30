@@ -33,6 +33,8 @@ export abstract class BaseBlock<T extends IBlock> extends BaseModel<T> {
 
   async onConnect() {
     this.collection.createIndex({ hash: 1 }, { background: true });
+    this.collection.createIndex({ height: -1 }, { background: true });
+    this.collection.createIndex({ chain: 1, network: 1, processed: 1 }, { background: true });
     this.collection.createIndex({ chain: 1, network: 1, processed: 1, height: -1 }, { background: true });
     this.collection.createIndex({ chain: 1, network: 1, timeNormalized: 1 }, { background: true });
     this.collection.createIndex({ previousBlockHash: 1 }, { background: true });
