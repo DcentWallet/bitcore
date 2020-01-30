@@ -160,6 +160,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
 
       }
       await wait(50);
+      count++;
     }
     logger.info(`Local Tip: `, {localTip})
     if (header && localTip && localTip.hash === header.prevHash) {
