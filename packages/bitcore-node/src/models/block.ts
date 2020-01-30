@@ -87,10 +87,12 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
       initialSyncComplete
     });
 
+    await Promise.all([bulkwrite, updateone, transaction]);
+
     if (initialSyncComplete) {
       EventStorage.signalBlock(convertedBlock);
     }
-    await Promise.all([bulkwrite, updateone, transaction]);
+    
     await this.collection.updateOne({ hash: convertedBlock.hash, chain, network }, { $set: { processed: true } });
   }
 
