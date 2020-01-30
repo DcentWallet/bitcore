@@ -9,6 +9,7 @@ import { SpentHeightIndicators } from '../types/Coin';
 import { EventStorage } from './events';
 import { StorageService, secondaryPreferrence } from '../services/storage';
 import { BaseBlock, IBlock } from './baseBlock';
+import { wait } from '../utils/wait'
 
 export type IBtcBlock = IBlock & {
   version: number;
@@ -149,7 +150,17 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
 
   async handleReorg(params: { header?: Bitcoin.Block.HeaderObj; chain: string; network: string }): Promise<boolean> {
     const { header, chain, network } = params;
-    let localTip = await this.getLocalTip(params);
+    let localTip;
+    let count = 0;
+    while(count < 5){
+      localTip = await this.getLocalTip(params);
+      if(localTip && localTip.height > 0) {
+        break;
+      } else if (header && localTip && localTip.hash === header.prevHash) {
+
+      }
+      await wait(50);
+    }
     logger.info(`Local Tip: `, {localTip})
     if (header && localTip && localTip.hash === header.prevHash) {
       return false;
