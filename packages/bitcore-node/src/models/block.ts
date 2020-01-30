@@ -157,7 +157,7 @@ export class BitcoinBlock extends BaseBlock<IBtcBlock> {
     while(count < 5){
       localTip = await this.getLocalTip(params);
       if (header && localTip && localTip.hash === header.prevHash) {
-
+        break;
       }
       await wait(50);
       count++;
